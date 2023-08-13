@@ -198,50 +198,17 @@ int main() {
 
     CURL *curl = curl_easy_init();
 
-    // Fetch server list from Speedtest API if not connected to servers in the array
+    // Fetch server list from Speedtest API
     if (curl) {
-        int connected = 0;
-        for (int i = 0; i < num_servers; i++) {
-            sockfd = socket(AF_INET, SOCK_STREAM, 0);
-            if (sockfd < 0) {
-                printf("Error opening socket for speed test.\n");
-                return 1;
-            }
-
-            memset(&server_addr, 0, sizeof(server_addr));
-            server_addr.sin_family = AF_INET;
-            server_addr.sin_port = htons(80);
-            server_addr.sin_addr.s_addr = inet_addr(server_list[i]);
-
-            int connect_retries = 0;
-            while (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-                if (connect_retries >= MAX_CONNECT_RETRIES) {
-                    break;
-                }
-                connect_retries++;
-                usleep(1000000);  // Wait for 1 second before retrying
-            }
-
-            if (connect_retries < MAX_CONNECT_RETRIES) {
-                connected = 1;
-                break;
-            }
-
-            close(sockfd);
+        char api_url[] = "https://www.speedtest.net/api/v2/servers";
+        curl_easy_setopt(curl, CURLOPT_URL, api_url);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        CURLcode res = curl_easy_perform(curl);
+        if (res != CURLE_OK) {
+            printf("Error fetching server list from API.\n");
+            curl_easy_cleanup(curl);
+            return 1;
         }
-
-        if (!connected) {
-            char api_url[] = "https://www.speedtest.net/api/v2/servers";
-            curl_easy_setopt(curl, CURLOPT_URL, api_url);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-            CURLcode res = curl_easy_perform(curl);
-            if (res != CURLE_OK) {
-                printf("Error fetching server list from API.\n");
-                curl_easy_cleanup(curl);
-                return 1;
-            }
-        }
-
         curl_easy_cleanup(curl);
     }
 
