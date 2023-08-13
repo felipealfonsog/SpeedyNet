@@ -192,10 +192,7 @@ int main() {
 
     const char *server_list[] = {
         "8.8.8.8",   // Google DNS
-        "1.1.1.1",   // Cloudflare DNS
-        "208.67.222.222",  // OpenDNS
-        "9.9.9.9",   // Quad9 DNS
-        "185.228.168.168", // CleanBrowsing DNS
+        "1.1.1.1",   // Cloudflare DNS,
     };
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
 
