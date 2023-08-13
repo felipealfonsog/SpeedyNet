@@ -184,7 +184,6 @@ double calculatePacketLoss(const char *server) {
 }
 
 int main() {
-    int sockfd;
     struct sockaddr_in server_addr;
     char buffer[BUFFER_SIZE];
     clock_t start_time, end_time;
@@ -192,8 +191,8 @@ int main() {
 
     const char *server_list[] = {
         "8.8.8.8",   // Google DNS
-        "1.1.1.1",   // Cloudflare DNS,
-        "9.9.9.9",   // Quad9 DNS
+        "1.1.1.1",   // Cloudflare DNS
+        "208.67.222.222", // OpenDNS
         "185.228.168.9", // CleanBrowsing DNS
         // Add more servers here
     };
