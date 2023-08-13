@@ -7,3 +7,14 @@ With a comprehensive yet intuitive interface, SpeedyNet not only delivers real-t
 
 Experience the convenience of on-demand speed testing without relying on external servers or websites. SpeedyNet empowers you to gauge the health of your Internet link, troubleshoot issues, and verify service quality, all through a seamless command-line experience. Stay in control of your network performance with SpeedyNet.
 
+#### NOTES
+
+compiling:
+
+```
+gcc -o speedynet speedynet.c -lcurl
+```
+
+
+
+
