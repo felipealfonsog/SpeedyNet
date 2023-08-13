@@ -14,7 +14,6 @@
 
 #define BUFFER_SIZE 1024
 #define TEST_DURATION 5
-#define MAX_CONNECT_RETRIES 5
 
 int sockfd;
 int packet_loss_received = 0;
@@ -139,7 +138,11 @@ double calculatePacketLoss(const char *server) {
 
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(server);
+    if (inet_pton(AF_INET, server, &server_addr.sin_addr) <= 0) {
+        printf("Invalid address for packet loss test.\n");
+        close(sockfd);
+        exit(1);
+    }
 
     // Set TTL
     if (setsockopt(sockfd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) < 0) {
@@ -225,17 +228,17 @@ int main() {
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(80);
-    server_addr.sin_addr.s_addr = inet_addr(selected_server);
+    if (inet_pton(AF_INET, selected_server, &server_addr.sin_addr) <= 0) {
+        printf("Invalid address for speed test.\n");
+        close(sockfd);
+        return 1;
+    }
 
+    int connect_result = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
     int connection_failed = 0;
-    int connect_retries = 0;
-    while (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        if (connect_retries >= MAX_CONNECT_RETRIES) {
-            connection_failed = 1;
-            break;
-        }
-        connect_retries++;
-        usleep(1000000);  // Wait for 1 second before retrying
+
+    if (connect_result < 0) {
+        connection_failed = 1;
     }
 
     start_time = clock();
