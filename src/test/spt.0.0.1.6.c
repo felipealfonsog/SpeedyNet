@@ -100,7 +100,6 @@ double calculateLatency(const char *server) {
 
     if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
         close(sockfd);
-        printf("Error connecting to server for latency test.\n");
         return -1.0; // Indicate connection failure
     }
 
@@ -195,7 +194,7 @@ int main() {
 
     const char *server_list[] = {
         "8.8.8.8",   // Google DNS
-        "1.1.1.1",   // Cloudflare DNS,
+        "1.1.1.1",   // Cloudflare DNS
     };
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
 
@@ -244,16 +243,9 @@ int main() {
     start_time = clock();
     for (int i = 0; i < BUFFER_SIZE; i++) buffer[i] = 'a';
 
-    displayIntro();
     printf("Performing speed test...\n");
 
-    for (int i = 0; i < TEST_DURATION * 10; i++) {
-        if (connection_failed) {
-            printf("In process... Unable to connect to server\n");
-            usleep(1000000);  // Wait for 1 second
-            continue;
-        }
-
+    for (int i = 0; i < TEST_DURATION * 1000; i++) {
         int send_result = send(sockfd, buffer, sizeof(buffer), 0);
         int recv_result = recv(sockfd, buffer, sizeof(buffer), 0);
 
@@ -265,17 +257,22 @@ int main() {
 
         // Display progress and calculations
         printf("In process... %.2f%% complete\n", (i + 1) / (double)(TEST_DURATION * 10) * 100);
+        printf("Download Speed: %.2f Mbps\n", (double)(BUFFER_SIZE * (i + 1) * 1000) / (total_time * 1024 * 1024));
+        printf("Upload Speed: %.2f Mbps\n", (double)(BUFFER_SIZE * (i + 1) * 1000) / (total_time * 1024 * 1024));
+        printf("Latency: %.2f ms\n", calculateLatency(selected_server));
+        printf("Packet Loss: %.2f%%\n", calculatePacketLoss(selected_server) * 100.0);
         usleep(100000);  // Wait for 100 milliseconds
     }
 
     end_time = clock();
     total_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    double download_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
-    double upload_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
+    double download_speed = (double)(BUFFER_SIZE * TEST_DURATION * 1000) / (total_time * 1024 * 1024);
+    double upload_speed = (double)(BUFFER_SIZE * TEST_DURATION * 1000) / (total_time * 1024 * 1024);
     double latency = connection_failed ? -1.0 : calculateLatency(selected_server);
     double packet_loss = calculatePacketLoss(selected_server);
 
-    printf("\nTest completed.\n");
+    // Display the user interface
+    displayIntro();
     printf("Selected Server: %s\n", selected_server);
     printf("Download Speed: %.2f Mbps\n", download_speed);
     printf("Upload Speed: %.2f Mbps\n", upload_speed);

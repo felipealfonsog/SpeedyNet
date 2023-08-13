@@ -82,25 +82,17 @@ double calculateLatency(const char *server) {
     char buffer[BUFFER_SIZE];
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        printf("Error opening socket for latency test.\n");
-        return -1.0;
-    }
+    if (sockfd < 0) error("Error opening socket");
 
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(80);
-    if (inet_pton(AF_INET, server, &server_addr.sin_addr) <= 0) {
-        printf("Invalid address for latency test.\n");
-        close(sockfd);
-        return -1.0;
-    }
+    if (inet_pton(AF_INET, server, &server_addr.sin_addr) <= 0) error("Invalid address");
 
     gettimeofday(&start_time, NULL);
 
     if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
         close(sockfd);
-        printf("Error connecting to server for latency test.\n");
         return -1.0; // Indicate connection failure
     }
 
@@ -131,18 +123,11 @@ double calculatePacketLoss(const char *server) {
     int ttl = 64;  // Time-to-Live (TTL) value for the packet
 
     sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-    if (sockfd < 0) {
-        printf("Error opening socket for packet loss test.\n");
-        exit(1);
-    }
+    if (sockfd < 0) error("Error opening socket");
 
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    if (inet_pton(AF_INET, server, &server_addr.sin_addr) <= 0) {
-        printf("Invalid address for packet loss test.\n");
-        close(sockfd);
-        exit(1);
-    }
+    if (inet_pton(AF_INET, server, &server_addr.sin_addr) <= 0) error("Invalid address");
 
     // Set TTL
     if (setsockopt(sockfd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) < 0) {
@@ -195,44 +180,30 @@ int main() {
 
     const char *server_list[] = {
         "8.8.8.8",   // Google DNS
-        "1.1.1.1",   // Cloudflare DNS,
+        "1.1.1.1",   // Cloudflare DNS
     };
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
 
     CURL *curl = curl_easy_init();
-    if (!curl) {
-        printf("Error initializing CURL.\n");
-        return 1;
-    }
+    if (!curl) return 1;
 
     char api_url[] = "https://www.speedtest.net/api/v2/servers";
     curl_easy_setopt(curl, CURLOPT_URL, api_url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     CURLcode res = curl_easy_perform(curl);
-    if (res != CURLE_OK) {
-        printf("Error fetching server list from API.\n");
-        curl_easy_cleanup(curl);
-        return 1;
-    }
+    if (res != CURLE_OK) return 1;
     curl_easy_cleanup(curl);
 
     srand(time(NULL));
     const char *selected_server = num_servers > 0 ? server_list[rand() % num_servers] : "8.8.8.8";
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        printf("Error opening socket for speed test.\n");
-        return 1;
-    }
+    if (sockfd < 0) error("Error opening socket");
 
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(80);
-    if (inet_pton(AF_INET, selected_server, &server_addr.sin_addr) <= 0) {
-        printf("Invalid address for speed test.\n");
-        close(sockfd);
-        return 1;
-    }
+    if (inet_pton(AF_INET, selected_server, &server_addr.sin_addr) <= 0) error("Invalid address");
 
     int connect_result = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
     int connection_failed = 0;
@@ -244,38 +215,20 @@ int main() {
     start_time = clock();
     for (int i = 0; i < BUFFER_SIZE; i++) buffer[i] = 'a';
 
-    displayIntro();
-    printf("Performing speed test...\n");
-
-    for (int i = 0; i < TEST_DURATION * 10; i++) {
-        if (connection_failed) {
-            printf("In process... Unable to connect to server\n");
-            usleep(1000000);  // Wait for 1 second
-            continue;
-        }
-
-        int send_result = send(sockfd, buffer, sizeof(buffer), 0);
-        int recv_result = recv(sockfd, buffer, sizeof(buffer), 0);
-
-        if (send_result < 0 || recv_result < 0) {
-            printf("Error sending/receiving data during speed test.\n");
-            close(sockfd);
-            return 1;
-        }
-
-        // Display progress and calculations
-        printf("In process... %.2f%% complete\n", (i + 1) / (double)(TEST_DURATION * 10) * 100);
-        usleep(100000);  // Wait for 100 milliseconds
+    for (int i = 0; i < TEST_DURATION * 1000; i++) {
+        send(sockfd, buffer, sizeof(buffer), 0);
+        recv(sockfd, buffer, sizeof(buffer), 0);
     }
 
     end_time = clock();
     total_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    double download_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
-    double upload_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
+    double download_speed = (double)(BUFFER_SIZE * TEST_DURATION * 1000) / (total_time * 1024 * 1024);
+    double upload_speed = (double)(BUFFER_SIZE * TEST_DURATION * 1000) / (total_time * 1024 * 1024);
     double latency = connection_failed ? -1.0 : calculateLatency(selected_server);
     double packet_loss = calculatePacketLoss(selected_server);
 
-    printf("\nTest completed.\n");
+    // Display the user interface
+    displayIntro();
     printf("Selected Server: %s\n", selected_server);
     printf("Download Speed: %.2f Mbps\n", download_speed);
     printf("Upload Speed: %.2f Mbps\n", upload_speed);
