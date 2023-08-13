@@ -7,6 +7,19 @@ With a comprehensive yet intuitive interface, SpeedyNet not only delivers real-t
 
 Experience the convenience of on-demand speed testing without relying on external servers or websites. SpeedyNet empowers you to gauge the health of your Internet link, troubleshoot issues, and verify service quality, all through a seamless command-line experience. Stay in control of your network performance with SpeedyNet.
 
+
+![Version](https://img.shields.io/github/release/felipealfonsog/SpeedyNet.svg?style=flat&color=blue)
+![Main Language](https://img.shields.io/github/languages/top/felipealfonsog/SpeedyNet.svg?style=flat&color=blue)
+[![Open Source? Yes!](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)](https://github.com/Naereen/badges/)
+
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
+<!--
+[![GPL license](https://img.shields.io/badge/License-GPL-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+-->
+
+[![Vim](https://img.shields.io/badge/--019733?logo=vim)](https://www.vim.org/)
+[![Visual Studio Code](https://img.shields.io/badge/--007ACC?logo=visual%20studio%20code&logoColor=ffffff)](https://code.visualstudio.com/)
+
 ## Features
 
 ### 1. Speed Test
@@ -58,6 +71,20 @@ gcc -o speedynet speedynet.c -lcurl
 - Developed by Felipe Alfonso González, a Computer Science Engineer from Chile.
 - Contact: f.alfonso@res-ear.ch
 - GitHub: [github.com/felipealfonsog](https://github.com/felipealfonsog)
+
+#### Support and Contributions
+
+If you find this project helpful and would like to support its development, there are several ways you can contribute:
+
+- **Code Contributions**: If you're a developer, you can contribute by submitting pull requests with bug fixes, new features, or improvements. Feel free to fork the project and create your own branch to work on.
+- **Bug Reports and Feedback**: If you encounter any issues or have suggestions for improvement, please open an issue on the project's GitHub repository. Your feedback is valuable in making the project better.
+- **Documentation**: Improving the documentation is always appreciated. If you find any gaps or have suggestions to enhance the project's documentation, please let me know.
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-%E2%98%95-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/felipealfonsog)
+[![PayPal](https://img.shields.io/badge/Donate%20with-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/felipealfonsog)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor%20me%20on-GitHub-%23EA4AAA?style=flat-square&logo=github-sponsors&logoColor=white)](https://github.com/sponsors/felipealfonsog)
+
+Your support and contributions are greatly appreciated! Thank you for your help in making this project better.
 
 
 ### 7. MIT Licensed
