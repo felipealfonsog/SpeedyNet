@@ -9,7 +9,12 @@ Experience the convenience of on-demand speed testing without relying on externa
 
 #### NOTES
 
-compiling :
+compiling:
+
+```
 gcc -o speedynet speedynet.c -lcurl
+```
+
+
 
 
