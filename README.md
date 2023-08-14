@@ -1,4 +1,4 @@
-# SpeedyNet
+## SpeedyNet
 SpeedyNet is a command-line utility for Linux and macOS that empowers users to accurately measure their Internet connection's download and upload speeds, providing real-time feedback on network performance.
 
 SpeedyNet is a powerful and user-friendly command-line tool designed to assess the true capabilities of your Internet connection. Compatible with both Linux and macOS, SpeedyNet eliminates the need for web-based tests by directly measuring download and upload speeds in a terminal environment. Leveraging advanced network protocols and efficient data transmission techniques, SpeedyNet offers unparalleled accuracy and reliability.
@@ -20,36 +20,36 @@ Experience the convenience of on-demand speed testing without relying on externa
 [![Vim](https://img.shields.io/badge/--019733?logo=vim)](https://www.vim.org/)
 [![Visual Studio Code](https://img.shields.io/badge/--007ACC?logo=visual%20studio%20code&logoColor=ffffff)](https://code.visualstudio.com/)
 
-## Features
+#### Features
 
-### 1. Speed Test
+#### Speed Test
 - Measures download and upload speeds of the internet connection.
 - Utilizes TCP sockets to simulate network traffic and calculate data transfer rates.
 - Displays progress and completion percentage during the test.
 
-### 2. Latency Test (Ping)
+#### Latency Test (Ping)
 - Measures the round-trip time for data to travel between the user's device and a server.
 - Calculates latency in milliseconds (ms) to indicate network responsiveness.
 
-### 3. Packet Loss Test
+#### Packet Loss Test
 - Estimates the percentage of data packets lost during transmission.
 - Uses Internet Control Message Protocol (ICMP) Echo requests to simulate network traffic.
 - Monitors the received ICMP Echo replies and calculates packet loss.
 
-### 4. Server Selection
+#### Server Selection
 - Provides a list of predefined servers, including Google DNS, Cloudflare DNS, OpenDNS, Quad9 DNS, and CleanBrowsing DNS.
 - Can fetch a list of servers from the Speedtest API to enable additional server options.
 
-### 5. User-Friendly Interface
+#### User-Friendly Interface
 - Displays an ASCII art logo upon launching the utility.
 - Shows progress indicators during tests to keep users informed about ongoing operations.
 - Presents the results in a clear format with selected server, download/upload speeds, latency, and packet loss.
 
-### 6. Error Handling
+#### Error Handling
 - Handles various network errors, such as socket creation, connection failures, and API requests.
 - Provides descriptive error messages to guide users in understanding issues.
 
-## Usage
+#### Usage
 
 1. Compile the program using a C compiler (e.g., GCC) and the provided source code.
 2. Run the executable (`./speedynet`) to start the speed test utility.
@@ -67,7 +67,7 @@ gcc -o speedynet speedynet.c -lcurl
 ```
 
 
-## Developer
+#### Developer
 - Developed by Felipe Alfonso González, a Computer Science Engineer from Chile.
 - Contact: f.alfonso@res-ear.ch
 - GitHub: [github.com/felipealfonsog](https://github.com/felipealfonsog)
@@ -87,7 +87,7 @@ If you find this project helpful and would like to support its development, ther
 Your support and contributions are greatly appreciated! Thank you for your help in making this project better.
 
 
-### 7. MIT Licensed
+#### MIT Licensed
 - Distributed under the MIT License, allowing users to freely use, modify, and distribute the software.
 
 

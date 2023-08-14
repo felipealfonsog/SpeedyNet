@@ -184,7 +184,6 @@ double calculatePacketLoss(const char *server) {
 }
 
 int main() {
-    int sockfd;
     struct sockaddr_in server_addr;
     char buffer[BUFFER_SIZE];
     clock_t start_time, end_time;
@@ -192,28 +191,12 @@ int main() {
 
     const char *server_list[] = {
         "8.8.8.8",   // Google DNS
-        "1.1.1.1",   // Cloudflare DNS,
-        "9.9.9.9",   // Quad9 DNS
+        "1.1.1.1",   // Cloudflare DNS
+        "208.67.222.222", // OpenDNS
         "185.228.168.9", // CleanBrowsing DNS
         // Add more servers here
     };
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
-
-    CURL *curl = curl_easy_init();
-
-    // Fetch server list from Speedtest API
-    if (curl) {
-        char api_url[] = "https://www.speedtest.net/api/v2/servers";
-        curl_easy_setopt(curl, CURLOPT_URL, api_url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        CURLcode res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            printf("Error fetching server list from API.\n");
-            curl_easy_cleanup(curl);
-            return 1;
-        }
-        curl_easy_cleanup(curl);
-    }
 
     srand(time(NULL));
     const char *selected_server = NULL;
