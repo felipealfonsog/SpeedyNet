@@ -28,6 +28,19 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return size * nmemb;
 }
 
+int connectWithRetries(int sockfd, const struct sockaddr *addr, socklen_t addrlen, int max_retries, int retry_interval) {
+    int result;
+    for (int i = 0; i < max_retries; i++) {
+        result = connect(sockfd, addr, addrlen);
+        if (result == 0) {
+            return result;
+        }
+        printf("Connection attempt %d failed. Retrying in %d seconds...\n", i + 1, retry_interval);
+        sleep(retry_interval);
+    }
+    return result;
+}
+
 void displayIntro() {
     printf("\n");
     printf("╔══╗──────╔╗─╔═╦╗─╔╗\n");
@@ -184,6 +197,7 @@ double calculatePacketLoss(const char *server) {
 }
 
 int main() {
+    int sockfd;
     struct sockaddr_in server_addr;
     char buffer[BUFFER_SIZE];
     clock_t start_time, end_time;
@@ -191,12 +205,25 @@ int main() {
 
     const char *server_list[] = {
         "8.8.8.8",   // Google DNS
-        "1.1.1.1",   // Cloudflare DNS
-        "208.67.222.222", // OpenDNS
-        "185.228.168.9", // CleanBrowsing DNS
-        // Add more servers here
+        "1.1.1.1",   // Cloudflare DNS,
     };
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
+
+    CURL *curl = curl_easy_init();
+
+    // Fetch server list from Speedtest API
+    if (curl) {
+        char api_url[] = "https://www.speedtest.net/api/v2/servers";
+        curl_easy_setopt(curl, CURLOPT_URL, api_url);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        CURLcode res = curl_easy_perform(curl);
+        if (res != CURLE_OK) {
+            printf("Error fetching server list from API.\n");
+            curl_easy_cleanup(curl);
+            return 1;
+        }
+        curl_easy_cleanup(curl);
+    }
 
     srand(time(NULL));
     const char *selected_server = NULL;
@@ -215,13 +242,12 @@ int main() {
         server_addr.sin_addr.s_addr = inet_addr(server_list[i]);
 
         int connect_retries = 0;
-        while (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        while (connectWithRetries(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr), MAX_CONNECT_RETRIES, 1) < 0) {
             if (connect_retries >= MAX_CONNECT_RETRIES) {
                 connection_failed = 1;
                 break;
             }
             connect_retries++;
-            usleep(1000000);  // Wait for 1 second before retrying
         }
 
         if (!connection_failed) {
@@ -247,7 +273,7 @@ int main() {
     server_addr.sin_port = htons(80);
     server_addr.sin_addr.s_addr = inet_addr(selected_server);
 
-    int connect_result = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    int connect_result = connectWithRetries(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr), MAX_CONNECT_RETRIES, 1);
     if (connect_result < 0) {
         printf("Error connecting to server for speed test.\n");
         return 1;
