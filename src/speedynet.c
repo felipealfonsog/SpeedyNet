@@ -198,22 +198,6 @@ int main() {
     };
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
 
-    CURL *curl = curl_easy_init();
-
-    // Fetch server list from Speedtest API
-    if (curl) {
-        char api_url[] = "https://www.speedtest.net/api/v2/servers";
-        curl_easy_setopt(curl, CURLOPT_URL, api_url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        CURLcode res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            printf("Error fetching server list from API.\n");
-            curl_easy_cleanup(curl);
-            return 1;
-        }
-        curl_easy_cleanup(curl);
-    }
-
     srand(time(NULL));
     const char *selected_server = NULL;
 
