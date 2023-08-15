@@ -28,19 +28,6 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return size * nmemb;
 }
 
-int connectWithRetries(int sockfd, const struct sockaddr *addr, socklen_t addrlen, int max_retries, int retry_interval) {
-    int result;
-    for (int i = 0; i < max_retries; i++) {
-        result = connect(sockfd, addr, addrlen);
-        if (result == 0) {
-            return result;
-        }
-        printf("Connection attempt %d failed. Retrying in %d seconds...\n", i + 1, retry_interval);
-        sleep(retry_interval);
-    }
-    return result;
-}
-
 void displayIntro() {
     printf("\n");
     printf("╔══╗──────╔╗─╔═╦╗─╔╗\n");
@@ -242,12 +229,13 @@ int main() {
         server_addr.sin_addr.s_addr = inet_addr(server_list[i]);
 
         int connect_retries = 0;
-        while (connectWithRetries(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr), MAX_CONNECT_RETRIES, 1) < 0) {
+        while (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
             if (connect_retries >= MAX_CONNECT_RETRIES) {
                 connection_failed = 1;
                 break;
             }
             connect_retries++;
+            usleep(1000000);  // Wait for 1 second before retrying
         }
 
         if (!connection_failed) {
@@ -273,7 +261,7 @@ int main() {
     server_addr.sin_port = htons(80);
     server_addr.sin_addr.s_addr = inet_addr(selected_server);
 
-    int connect_result = connectWithRetries(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr), MAX_CONNECT_RETRIES, 1);
+    int connect_result = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (connect_result < 0) {
         printf("Error connecting to server for speed test.\n");
         return 1;
