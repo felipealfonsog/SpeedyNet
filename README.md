@@ -66,6 +66,12 @@ compiling:
 gcc -o speedynet speedynet.c -lcurl
 ```
 
+In macOS is important to install this library: 
+
+```
+brew install liboping
+```
+
 
 #### Developer
 - Developed by Felipe Alfonso González, a Computer Science Engineer from Chile.

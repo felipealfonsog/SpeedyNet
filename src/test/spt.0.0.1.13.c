@@ -11,7 +11,7 @@
 #include <math.h>
 #include <netinet/ip_icmp.h>
 #include <signal.h>
-#include <oping.h> // Include the liboping header for macOS
+#include <oping.h> // Include the liboping header
 
 #define BUFFER_SIZE 1024
 #define TEST_DURATION 5
@@ -274,10 +274,6 @@ int main() {
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
 
     CURL *curl = curl_easy_init();
-    if (!curl) {
-        fprintf(stderr, "Error initializing libcurl.\n");
-        return 1;
-    }
 
     // Fetch server list from Speedtest API
     if (curl) {
