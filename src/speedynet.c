@@ -11,7 +11,7 @@
 #include <math.h>
 #include <netinet/ip_icmp.h>
 #include <signal.h>
-#include <oping.h> // Include the liboping header for macOS
+#include <oping.h> // Include the liboping header
 
 #define BUFFER_SIZE 1024
 #define TEST_DURATION 5
@@ -77,47 +77,6 @@ unsigned short in_cksum(unsigned short *addr, int len) {
     return answer;
 }
 
-/*
-double calculateLatency(const char *server) {
-    struct timeval start_time, end_time;
-    int sockfd;
-    struct sockaddr_in server_addr;
-    char buffer[BUFFER_SIZE];
-
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        printf("Error opening socket for latency test.\n");
-        return -1.0;
-    }
-
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(80);
-    if (inet_pton(AF_INET, server, &server_addr.sin_addr) <= 0) {
-        printf("Invalid address for latency test.\n");
-        close(sockfd);
-        return -1.0;
-    }
-
-    gettimeofday(&start_time, NULL);
-
-    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        close(sockfd);
-        printf("Error connecting to server for latency test.\n");
-        return -1.0; // Indicate connection failure
-    }
-
-    gettimeofday(&end_time, NULL);
-
-    close(sockfd);
-
-    double latency = (double)(end_time.tv_sec - start_time.tv_sec) * 1000.0 +
-                     (double)(end_time.tv_usec - start_time.tv_usec) / 1000.0;
-
-    return latency;
-}
-*/
-// improvement for macOS
 double calculateLatency(const char *server) {
     struct timeval start_time, end_time;
     int ret;
@@ -151,7 +110,6 @@ double calculateLatency(const char *server) {
     return latency;
 }
 
-
 void sigIntHandler(int signo) {
     packet_loss_received++;
     if (packet_loss_received >= 3) {
@@ -162,68 +120,6 @@ void sigIntHandler(int signo) {
     }
 }
 
-/*
-double calculatePacketLoss(const char *server) {
-    struct sockaddr_in server_addr;
-    int sockfd;
-    int seq_num = 1;
-    int ttl = 64;  // Time-to-Live (TTL) value for the packet
-
-    sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-    if (sockfd < 0) {
-        printf("Error opening socket for packet loss test.\n");
-        exit(1);
-    }
-
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(server);
-
-    // Set TTL
-    if (setsockopt(sockfd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) < 0) {
-        perror("Error setting TTL");
-        close(sockfd);
-        exit(1);
-    }
-
-    // Install the signal handler for SIGINT
-    signal(SIGINT, sigIntHandler);
-
-    while (1) {
-        struct icmphdr icmp_header;
-        memset(&icmp_header, 0, sizeof(icmp_header));
-
-        icmp_header.type = ICMP_ECHO;
-        icmp_header.code = 0;
-        icmp_header.un.echo.id = getpid();
-        icmp_header.un.echo.sequence = seq_num++;
-
-        icmp_header.checksum = 0;
-        icmp_header.checksum = in_cksum((unsigned short *)&icmp_header, sizeof(icmp_header));
-
-        struct timeval start_time, end_time;
-        gettimeofday(&start_time, NULL);
-
-        sendto(sockfd, &icmp_header, sizeof(icmp_header), 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
-
-        char recv_buffer[BUFFER_SIZE];
-        ssize_t num_bytes = recv(sockfd, recv_buffer, sizeof(recv_buffer), 0);
-        if (num_bytes > 0) {
-            gettimeofday(&end_time, NULL);
-
-            if (end_time.tv_sec - start_time.tv_sec < 1) {
-                packet_loss_received--;
-            }
-        }
-        usleep(1000000);  // Wait for 1 second
-    }
-
-    return 0.0;  // Return 0.0 for demonstration purposes
-}
-
-*/
-
-// imrpovements & implementations for macOS
 double calculatePacketLoss(const char *server) {
     int ret;
     pingobj_t *ping;
@@ -256,10 +152,6 @@ double calculatePacketLoss(const char *server) {
     return packet_loss;
 }
 
-
-
-
-
 int main() {
     int sockfd;
     struct sockaddr_in server_addr;
@@ -274,10 +166,6 @@ int main() {
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
 
     CURL *curl = curl_easy_init();
-    if (!curl) {
-        fprintf(stderr, "Error initializing libcurl.\n");
-        return 1;
-    }
 
     // Fetch server list from Speedtest API
     if (curl) {
