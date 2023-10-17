@@ -1,4 +1,5 @@
-## SpeedyNet
+## SpeedyNet [(Experimental Project)](#important-experimental-project)*
+
 SpeedyNet is a command-line utility for Linux and macOS that empowers users to accurately measure their Internet connection's download and upload speeds, providing real-time feedback on network performance.
 
 SpeedyNet is a powerful and user-friendly command-line tool designed to assess the true capabilities of your Internet connection. Compatible with both Linux and macOS, SpeedyNet eliminates the need for web-based tests by directly measuring download and upload speeds in a terminal environment. Leveraging advanced network protocols and efficient data transmission techniques, SpeedyNet offers unparalleled accuracy and reliability.
@@ -7,6 +8,7 @@ With a comprehensive yet intuitive interface, SpeedyNet not only delivers real-t
 
 Experience the convenience of on-demand speed testing without relying on external servers or websites. SpeedyNet empowers you to gauge the health of your Internet link, troubleshoot issues, and verify service quality, all through a seamless command-line experience. Stay in control of your network performance with SpeedyNet.
 
+<sub>* This is currently an experimental phase where the primary focus is on making the system functional and establishing a practical and logical pathway that aligns with both my vision and the project's goals.</sub>
 
 ![Version](https://img.shields.io/github/release/felipealfonsog/SpeedyNet.svg?style=flat&color=blue)
 ![Main Language](https://img.shields.io/github/languages/top/felipealfonsog/SpeedyNet.svg?style=flat&color=blue)
@@ -72,6 +74,11 @@ In macOS is important to install this library:
 brew install liboping
 ```
 
+#### 📝Important (Experimental Project)
+
+[![Experimental Project](https://img.shields.io/badge/Project-Type%3A%20Experimental-blueviolet)](#)
+
+<p>This project is still in its experimental stage and may have limitations in terms of features and compatibility. Use at your own discretion.</p>
 
 #### Developer
 - Developed by Felipe Alfonso González, a Computer Science Engineer from Chile.
