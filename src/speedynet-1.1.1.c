@@ -27,9 +27,22 @@ void sigIntHandler(int signo) {
 
 void displayIntro() {
     printf("\n");
+    printf("╔══╗──────╔╗─╔═╦╗─╔╗\n");
+    printf("║══╬═╦═╦═╦╝╠╦╣║║╠═╣╚╗\n");
+    printf("╠══║╬║╩╣╩╣╬║║║║║║╩╣╔╣\n");
+    printf("╚══╣╔╩═╩═╩═╬╗╠╩═╩═╩═╝\n");
+    printf("───╚╝──────╚═╝\n");
     printf("************************************\n");
-    printf("*        Internet Speed Test       *\n");
+    printf("*           SpeedyNet              *\n");
+    printf("*   Internet Speed Test Utility    *\n");
     printf("************************************\n");
+    printf("\n");
+    printf("With love from Chile\n");
+    printf("Developed by Felipe Alfonso González - Computer Science Engineer\n");
+    printf("Contact: f.alfonso@res-ear.ch\n");
+    printf("GitHub: github.com/felipealfonsog\n");
+        printf("\n");
+    printf("This software is licensed under the MIT License.\n");
     printf("\n");
 }
 
