@@ -10,10 +10,8 @@
 
 #define BUFFER_SIZE 1024
 #define TEST_DURATION 5
-#define MAX_CONNECT_RETRIES 5
 
 int sockfd;
-int interrupted = 0;
 
 void cleanup() {
     if (sockfd >= 0) {
@@ -22,15 +20,17 @@ void cleanup() {
 }
 
 void sigIntHandler(int signo) {
-    interrupted = 1;
+    printf("\nTest interrupted.\n");
+    cleanup();
+    exit(0);
 }
 
 void displayIntro() {
-    // (Código de presentación)
-}
-
-void displayLicense() {
-    // (Código de licencia)
+    printf("\n");
+    printf("************************************\n");
+    printf("*        Internet Speed Test       *\n");
+    printf("************************************\n");
+    printf("\n");
 }
 
 int performSpeedTest(const char *selected_server) {
@@ -62,12 +62,13 @@ int performSpeedTest(const char *selected_server) {
     printf("Performing speed test...\n");
 
     time_t start_timestamp = time(NULL);
-    double last_progress = 0.0;
 
-    // Set up the signal handler
-    signal(SIGINT, sigIntHandler);
+    struct sigaction sa;
+    sa.sa_handler = sigIntHandler;
+    sigaction(SIGINT, &sa, NULL);
 
-    for (int i = 0; i < TEST_DURATION * 10 && !interrupted; i++) {
+    int total_bytes_received = 0;
+    for (int i = 0; i < TEST_DURATION * 10; i++) {
         int send_result = send(sockfd, buffer, sizeof(buffer), 0);
         int recv_result = recv(sockfd, buffer, sizeof(buffer), 0);
 
@@ -77,33 +78,48 @@ int performSpeedTest(const char *selected_server) {
             return 1;
         }
 
-        double progress = (i + 1) / (double)(TEST_DURATION * 10) * 100;
-        if (progress > last_progress) {
-            last_progress = progress;
-            printf("In process... %.2f%% complete\r", progress);
-            fflush(stdout);
-        }
+        total_bytes_received += recv_result;
 
-        // Check if interrupted or timed out
         time_t current_timestamp = time(NULL);
-        if (interrupted || difftime(current_timestamp, start_timestamp) > 10.0) {
-            printf("\nTest interrupted or timed out.\n");
+        if (difftime(current_timestamp, start_timestamp) > 10.0) {
+            printf("\nTest timed out.\n");
             break;
         }
     }
 
     end_time = clock();
     total_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    double download_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
-    double upload_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
+    double download_speed = (double)(total_bytes_received) / (total_time * 1024 * 1024);
 
     printf("\nTest completed.\n");
     printf("Selected Server: %s\n", selected_server);
     printf("Download Speed: %.2f Mbps\n", download_speed);
-    printf("Upload Speed: %.2f Mbps\n", upload_speed);
 
     cleanup();
 
+    return 0;
+}
+
+int connectToServer(const char *server_ip) {
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("Error opening socket for speed test");
+        return -1;
+    }
+
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(80);
+    server_addr.sin_addr.s_addr = inet_addr(server_ip);
+
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Error connecting to server for speed test");
+        close(sockfd);
+        return -1;
+    }
+
+    close(sockfd);
     return 0;
 }
 
@@ -112,6 +128,7 @@ int main() {
         "8.8.8.8",   // Google DNS
         "1.1.1.1",   // Cloudflare DNS,
     };
+
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
 
     srand(time(NULL));
@@ -119,39 +136,18 @@ int main() {
 
     int connection_failed = 0;
     for (int i = 0; i < num_servers; i++) {
-        sockfd = socket(AF_INET, SOCK_STREAM, 0);
-        if (sockfd < 0) {
-            perror("Error opening socket for speed test");
-            return 1;
-        }
-
-        struct sockaddr_in server_addr;
-        memset(&server_addr, 0, sizeof(server_addr));
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_port = htons(80);
-        server_addr.sin_addr.s_addr = inet_addr(server_list[i]);
-
-        int connect_retries = 0;
-        while (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-            if (connect_retries >= MAX_CONNECT_RETRIES) {
-                connection_failed = 1;
-                break;
-            }
-            connect_retries++;
-            usleep(1000000);  // Wait for 1 second before retrying
-        }
-
-        if (!connection_failed) {
+        int result = connectToServer(server_list[i]);
+        if (result == 0) {
             selected_server = server_list[i];
             break;
         }
-
-        close(sockfd);
     }
 
-    if (connection_failed) {
-        selected_server = "8.8.8.8";  // Use a default server if all options failed
+    if (selected_server == NULL) {
+        fprintf(stderr, "Failed to connect to any server.\n");
+        return 1;
     }
 
+    displayIntro();
     return performSpeedTest(selected_server);
 }
