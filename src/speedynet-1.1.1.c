@@ -7,7 +7,6 @@
 #include <netinet/in.h>
 #include <time.h>
 #include <sys/time.h>
-#include <curl/curl.h>
 #include <math.h>
 #include <signal.h>
 
@@ -40,7 +39,7 @@ void displayIntro() {
     printf("*   Internet Speed Test Utility    *\n");
     printf("************************************\n");
     printf("\n");
-    printf("Version: - with love from Chile\n");
+    printf("Version: v.0.0.2 - with love from Chile\n");
     printf("Developed by Felipe Alfonso González - Computer Science Engineer\n");
     printf("Contact: f.alfonso@res-ear.ch\n");
     printf("GitHub: github.com/felipealfonsog\n");
@@ -51,10 +50,6 @@ void displayLicense() {
     printf("\n");
     printf("This software is licensed under the MIT License.\n");
     printf("\n");
-}
-
-size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
-    return size * nmemb;
 }
 
 int main() {
@@ -69,22 +64,6 @@ int main() {
         "1.1.1.1",   // Cloudflare DNS,
     };
     int num_servers = sizeof(server_list) / sizeof(server_list[0]);
-
-    CURL *curl = curl_easy_init();
-
-    // Fetch server list from Speedtest API
-    if (curl) {
-        char api_url[] = "https://www.speedtest.net/api/v2/servers";
-        curl_easy_setopt(curl, CURLOPT_URL, api_url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        CURLcode res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            printf("Error fetching server list from API.\n");
-            curl_easy_cleanup(curl);
-            return 1;
-        }
-        curl_easy_cleanup(curl);
-    }
 
     srand(time(NULL));
     const char *selected_server = NULL;
