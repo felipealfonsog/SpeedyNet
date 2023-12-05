@@ -52,6 +52,12 @@ void displayLicense() {
     printf("\n");
 }
 
+int interrupted = 0;
+
+void sigIntHandler(int signo) {
+    interrupted = 1;
+}
+
 int main() {
     int sockfd;
     struct sockaddr_in server_addr;
@@ -126,7 +132,13 @@ int main() {
     displayIntro();
     printf("Performing speed test...\n");
 
-    for (int i = 0; i < TEST_DURATION * 10; i++) {
+    time_t start_timestamp = time(NULL);
+    double last_progress = 0.0;
+
+    // Set up the signal handler
+    signal(SIGINT, sigIntHandler);
+
+    for (int i = 0; i < TEST_DURATION * 10 && !interrupted; i++) {
         int send_result = send(sockfd, buffer, sizeof(buffer), 0);
         int recv_result = recv(sockfd, buffer, sizeof(buffer), 0);
 
@@ -137,16 +149,26 @@ int main() {
         }
 
         double progress = (i + 1) / (double)(TEST_DURATION * 10) * 100;
-        printf("In process... %.2f%% complete\r", progress);
-        fflush(stdout);
-        usleep(100000);  // Wait for 100 milliseconds
+        if (progress > last_progress) {
+            last_progress = progress;
+            printf("In process... %.2f%% complete\r", progress);
+            fflush(stdout);
+        }
+
+        // Check if interrupted or timed out
+        time_t current_timestamp = time(NULL);
+        if (interrupted || difftime(current_timestamp, start_timestamp) > 10.0) {
+            printf("\nTest interrupted or timed out.\n");
+            break;
+        }
     }
-    printf("\n");
 
     end_time = clock();
     total_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
     double download_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
     double upload_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
+
+    // ... (remaining code)
 
     printf("\nTest completed.\n");
     printf("Selected Server: %s\n", selected_server);
@@ -155,11 +177,15 @@ int main() {
 
     if (connection_failed) {
         printf("Connection Status: Failed\n");
+    } else {
+        // ... (remaining code)
+        printf("Latency: %.2f ms\n", latency);
+        printf("Packet Loss: %.2f%%\n", packet_loss * 100.0);
     }
 
     displayLicense();
 
-    close(sockfd);
+    cleanup();
 
     return 0;
 }
