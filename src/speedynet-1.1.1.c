@@ -74,6 +74,9 @@ int main() {
     srand(time(NULL));
     const char *selected_server = NULL;
 
+    double latency = 0.0;
+    double packet_loss = 0.0;
+
     int connection_failed = 0;
     for (int i = 0; i < num_servers; i++) {
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -168,8 +171,6 @@ int main() {
     double download_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
     double upload_speed = (double)(BUFFER_SIZE * TEST_DURATION * 10) / (total_time * 1024 * 1024);
 
-    // ... (remaining code)
-
     printf("\nTest completed.\n");
     printf("Selected Server: %s\n", selected_server);
     printf("Download Speed: %.2f Mbps\n", download_speed);
@@ -178,7 +179,6 @@ int main() {
     if (connection_failed) {
         printf("Connection Status: Failed\n");
     } else {
-        // ... (remaining code)
         printf("Latency: %.2f ms\n", latency);
         printf("Packet Loss: %.2f%%\n", packet_loss * 100.0);
     }
