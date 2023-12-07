@@ -62,13 +62,19 @@ Experience the convenience of on-demand speed testing without relying on externa
 **Note:** SpeedyNet is a utility designed for testing purposes and may not provide results as accurate as dedicated speed test websites or applications.
 #### NOTES
 
-compiling:
+compiling in C:
 
 ```
-gcc -o speedynet speedynet.c -lcurl
+gcc -o speedynet-1.1.5 speedynet-1.1.5.c -lcurl && ./speedynet-1.1.5
 ```
 
-In macOS is important to install this library: 
+compiling in C++:
+
+```
+clang++ -o speedynet speedynet-1.1.4.cpp -lcurl && ./speedynet
+```
+
+In macOS & Linux is important to install this library (Get Brew to get the package): 
 
 ```
 brew install liboping
