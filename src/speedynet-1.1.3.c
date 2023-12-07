@@ -7,6 +7,9 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <sys/select.h>
+#include <fcntl.h>
+#include <errno.h>  // 
+#include <unistd.h> // 
 
 #define SERVER_COUNT 5
 #define MAX_SERVER_NAME 50
@@ -92,18 +95,19 @@ void connectToServer(int sockfd, const char* ip) {
     }
 }
 
+
+
+
+
 void runSpeedTest(Server server) {
     printf("\nRunning Speed Test for %s...\n", server.name);
 
-    // Create a socket
     int sockfd = createSocket();
 
-    // Configure a short timeout for the connection
     struct timeval timeout;
     timeout.tv_sec = 1;  // 1 second timeout
     timeout.tv_usec = 0;
 
-    // Set the timeout for sending and receiving data
     if (setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (const char *)&timeout, sizeof(timeout)) < 0 ||
         setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout)) < 0) {
         perror("Error setting socket timeout");
@@ -111,30 +115,49 @@ void runSpeedTest(Server server) {
         exit(EXIT_FAILURE);
     }
 
-    // Configure the server address
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(80);
     inet_pton(AF_INET, server.ip, &(server_addr.sin_addr));
 
-    // Attempt to connect to the server
     if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-        perror("Error connecting to server");
+        if (errno != EINPROGRESS) {
+            perror("Error connecting to server");
+            close(sockfd);
+            exit(EXIT_FAILURE);
+        }
+
+        fd_set writeSet;
+        FD_ZERO(&writeSet);
+        FD_SET(sockfd, &writeSet);
+
+        int result = select(sockfd + 1, NULL, &writeSet, NULL, &timeout);
+        if (result <= 0) {
+            perror("Error connecting to server");
+            close(sockfd);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (fcntl(sockfd, F_SETFL, 0) < 0) {
+        perror("Error setting blocking socket");
         close(sockfd);
         exit(EXIT_FAILURE);
     }
 
-    // Simulate data transfer and calculate speeds
     double downloadSpeed = 10.5;  // Simulated download speed in Mbps
     double uploadSpeed = 5.2;    // Simulated upload speed in Mbps
 
-    // Close the socket connection
     close(sockfd);
 
     printf("Download Speed: %.2f Mbps\n", downloadSpeed);
     printf("Upload Speed: %.2f Mbps\n", uploadSpeed);
 }
+
+
+
+
 
 
 
