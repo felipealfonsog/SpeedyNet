@@ -10,6 +10,8 @@
 #include <fcntl.h>
 #include <errno.h>  // 
 #include <unistd.h> // 
+#include <errno.h>
+#include <unistd.h>
 
 #define SERVER_COUNT 5
 #define MAX_SERVER_NAME 50
@@ -99,6 +101,8 @@ void connectToServer(int sockfd, const char* ip) {
 
 
 
+
+
 void runSpeedTest(Server server) {
     printf("\nRunning Speed Test for %s...\n", server.name);
 
@@ -121,23 +125,28 @@ void runSpeedTest(Server server) {
     server_addr.sin_port = htons(80);
     inet_pton(AF_INET, server.ip, &(server_addr.sin_addr));
 
-    if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-        if (errno != EINPROGRESS) {
-            perror("Error connecting to server");
-            close(sockfd);
-            exit(EXIT_FAILURE);
-        }
+    int connectResult = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
 
-        fd_set writeSet;
-        FD_ZERO(&writeSet);
-        FD_SET(sockfd, &writeSet);
+    if (connectResult < 0 && errno != EINPROGRESS) {
+        perror("Error connecting to server");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
 
-        int result = select(sockfd + 1, NULL, &writeSet, NULL, &timeout);
-        if (result <= 0) {
-            perror("Error connecting to server");
-            close(sockfd);
-            exit(EXIT_FAILURE);
-        }
+    fd_set writeSet;
+    FD_ZERO(&writeSet);
+    FD_SET(sockfd, &writeSet);
+
+    int selectResult = select(sockfd + 1, NULL, &writeSet, NULL, &timeout);
+
+    if (selectResult < 0) {
+        perror("Error in select");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    } else if (selectResult == 0) {
+        fprintf(stderr, "Error connecting to server: Operation timed out\n");
+        close(sockfd);
+        exit(EXIT_FAILURE);
     }
 
     if (fcntl(sockfd, F_SETFL, 0) < 0) {
@@ -154,6 +163,8 @@ void runSpeedTest(Server server) {
     printf("Download Speed: %.2f Mbps\n", downloadSpeed);
     printf("Upload Speed: %.2f Mbps\n", uploadSpeed);
 }
+
+
 
 
 
