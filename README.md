@@ -64,6 +64,12 @@ Experience the convenience of on-demand speed testing without relying on externa
 
 compiling in C:
 
+get into the code source folder: 
+
+```
+cd src
+```
+
 ```
 gcc -o speedynet-1.1.5 speedynet-1.1.5.c -lcurl && ./speedynet-1.1.5
 ```
