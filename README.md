@@ -71,13 +71,13 @@ cd src
 ```
 
 ```
-gcc -o speedynet-1.1.5 speedynet-1.1.5.c -lcurl && ./speedynet-1.1.5
+gcc -o speedynet_c speedynet.c -lcurl && ./speedynet_c
 ```
 
 compiling in C++:
 
 ```
-clang++ -o speedynet speedynet-1.1.4.cpp -lcurl && ./speedynet
+clang++ -o speedynet_cpp speedynet.cpp -lcurl && ./speedynet_cpp
 ```
 
 In macOS & Linux is important to install this library (Get Brew to get the package): 
