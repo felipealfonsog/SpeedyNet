@@ -1,3 +1,9 @@
+# ----------------------------------------------------------------
+# Developed by Felipe Alfonso González - Computer Science Engineer
+# Contact : f.alfonso@res-ear.ch - github.com/felipealfonsog
+# Under MIT Licence
+# ----------------------------------------------------------------
+
 #include <iostream>
 #include <vector>
 #include <chrono>
