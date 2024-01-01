@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct Server {
     char name[50];
@@ -23,7 +24,6 @@ double measurePacketLoss(const struct Server* server) {
 }
 
 double calculateAverageSpeed(double downloadSpeed, double uploadSpeed) {
-    // Calcula la velocidad promedio total en Mbps
     return (downloadSpeed + uploadSpeed) / 2;
 }
 
@@ -48,8 +48,8 @@ void displayIntro() {
     printf("\n");
 }
 
-int displayServerMenu(const struct Server servers[], size_t numServers) {
-    printf("Select a server:\n");
+void displayServerMenu(const struct Server servers[], size_t numServers) {
+    printf("Select a server by entering its number:\n");
 
     for (size_t i = 0; i < numServers; ++i) {
         printf("%zu. %s\n", i + 1, servers[i].name);
@@ -59,35 +59,69 @@ int displayServerMenu(const struct Server servers[], size_t numServers) {
     printf("Enter the number of the server: ");
     scanf("%d", &choice);
 
-    return choice;
-}
+    if (choice < 1 || choice > (int)numServers) {
+        printf("Invalid server choice.\n");
+        exit(EXIT_FAILURE);
+    }
 
-void displayResults(const struct Server* selectedServer, double downloadSpeed, double uploadSpeed, int latency, double packetLoss) {
-    printf("\nTest Results:\n");
-    printf("Selected Server: %s (%s)\n", selectedServer->name, selectedServer->address);
-    printf("Download Speed: %.2f Mbps\n", downloadSpeed);
-    printf("Upload Speed: %.2f Mbps\n", uploadSpeed);
+    struct Server selectedServer = servers[choice - 1];
 
-    // Additional unit conversions
-    printf("Download Speed: %.2f Kbps\n", downloadSpeed * 1000);
-    printf("Upload Speed: %.2f Gbps\n", uploadSpeed / 1000);
+    printf("\n╔════════════════════════════════════╗\n");
+    printf("║ Selected Server: %-20s (%s)   ║\n", selectedServer.name, selectedServer.address);
+    printf("╚════════════════════════════════════╝\n");
 
-    printf("Latency: %d ms\n", latency);
-    printf("Packet Loss: %.2f%%\n", packetLoss * 100);
+    double downloadSpeed = measureDownloadSpeed(&selectedServer);
+    double uploadSpeed = measureUploadSpeed(&selectedServer);
+    int latency = measureLatency(&selectedServer);
+    double packetLoss = measurePacketLoss(&selectedServer);
 
-    double avgSpeed = calculateAverageSpeed(downloadSpeed, uploadSpeed);
-    printf("Average Speed: %.2f Mbps\n", avgSpeed);
-}
+    printf("\n╔══════════════════════════╗\n");
+    printf("║ Test Results for %s   ║\n", selectedServer.name);
+    printf("╟──────────────────────────╢\n");
+    printf("║ Download Speed: %.2f Mbps ║\n", downloadSpeed);
+    printf("║ Upload Speed: %.2f Mbps   ║\n", uploadSpeed);
+    printf("║ Latency: %d ms            ║\n", latency);
+    printf("║ Packet Loss: %.2f%%        ║\n", packetLoss * 100);
+    printf("╚══════════════════════════╝\n");
 
-void displayAverageResults(double avgDownloadSpeed, double avgUploadSpeed, double avgLatency, double avgPacketLoss, size_t numTests) {
-    printf("\nAverage Results over %zu tests:\n", numTests);
-    printf("Average Download Speed: %.2f Mbps\n", avgDownloadSpeed);
-    printf("Average Upload Speed: %.2f Mbps\n", avgUploadSpeed);
-    printf("Average Latency: %.2f ms\n", avgLatency);
-    printf("Average Packet Loss: %.2f%%\n", avgPacketLoss * 100);
+    // Background test with 3 other random servers
+    printf("\nBackground Test with 3 Other Random Servers:\n");
 
-    double avgSpeed = calculateAverageSpeed(avgDownloadSpeed, avgUploadSpeed);
-    printf("Average Speed: %.2f Mbps\n", avgSpeed);
+    double avgDownloadSpeed = 0, avgUploadSpeed = 0, avgLatency = 0, avgPacketLoss = 0;
+
+    for (size_t i = 0; i < 3; ++i) {
+        size_t randomIndex = rand() % numServers;
+        struct Server randomServer = servers[randomIndex];
+
+        double randomDownloadSpeed = measureDownloadSpeed(&randomServer);
+        double randomUploadSpeed = measureUploadSpeed(&randomServer);
+        int randomLatency = measureLatency(&randomServer);
+        double randomPacketLoss = measurePacketLoss(&randomServer);
+
+        avgDownloadSpeed += randomDownloadSpeed;
+        avgUploadSpeed += randomUploadSpeed;
+        avgLatency += randomLatency;
+        avgPacketLoss += randomPacketLoss;
+
+        // Display the names of servers used for background tests
+        printf("\n╔════════════════════════════════════╗\n");
+        printf("║ Background Test Server %zu: %-11s   ║\n", i + 1, randomServer.name);
+        printf("╚════════════════════════════════════╝\n");
+    }
+
+    avgDownloadSpeed /= 3;
+    avgUploadSpeed /= 3;
+    avgLatency /= 3;
+    avgPacketLoss /= 3;
+
+    printf("\n╔════════════════════════════════════════╗\n");
+    printf("║ Average Results for 3 Background Tests ║\n");
+    printf("╟────────────────────────────────────────╢\n");
+    printf("║ Average Download Speed: %.2f Mbps      ║\n", avgDownloadSpeed);
+    printf("║ Average Upload Speed: %.2f Mbps        ║\n", avgUploadSpeed);
+    printf("║ Average Latency: %.2f ms               ║\n", avgLatency);
+    printf("║ Average Packet Loss: %.2f%%           ║\n", avgPacketLoss * 100);
+    printf("╚════════════════════════════════════════╝\n");
 }
 
 void handleError(const char* errorMessage) {
@@ -129,39 +163,7 @@ int main() {
 
     size_t numServers = sizeof(servers) / sizeof(servers[0]);
 
-    size_t numTests = 5;  // Change this to the desired number of tests
-
-    double avgDownloadSpeed = 0, avgUploadSpeed = 0, avgLatency = 0, avgPacketLoss = 0;
-
-    for (size_t i = 0; i < numTests; ++i) {
-        int choice = displayServerMenu(servers, numServers);
-
-        if (choice < 1 || choice > (int)numServers) {
-            handleError("Invalid server choice");
-            return 1;
-        }
-
-        struct Server selectedServer = servers[choice - 1];
-
-        double downloadSpeed = measureDownloadSpeed(&selectedServer);
-        double uploadSpeed = measureUploadSpeed(&selectedServer);
-        int latency = measureLatency(&selectedServer);
-        double packetLoss = measurePacketLoss(&selectedServer);
-
-        avgDownloadSpeed += downloadSpeed;
-        avgUploadSpeed += uploadSpeed;
-        avgLatency += latency;
-        avgPacketLoss += packetLoss;
-
-        displayResults(&selectedServer, downloadSpeed, uploadSpeed, latency, packetLoss);
-    }
-
-    avgDownloadSpeed /= numTests;
-    avgUploadSpeed /= numTests;
-    avgLatency /= numTests;
-    avgPacketLoss /= numTests;
-
-    displayAverageResults(avgDownloadSpeed, avgUploadSpeed, avgLatency, avgPacketLoss, numTests);
+    displayServerMenu(servers, numServers);
 
     return 0;
 }
