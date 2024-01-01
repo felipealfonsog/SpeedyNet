@@ -22,6 +22,11 @@ double measurePacketLoss(const struct Server* server) {
     return (rand() % 10) / 10.0;
 }
 
+double calculateAverageSpeed(double downloadSpeed, double uploadSpeed) {
+    // Calcula la velocidad promedio total en Mbps
+    return (downloadSpeed + uploadSpeed) / 2;
+}
+
 void displayIntro() {
     printf("\n");
     printf("╔══╗──────╔╗─╔═╦╗─╔╗\n");
@@ -69,6 +74,9 @@ void displayResults(const struct Server* selectedServer, double downloadSpeed, d
 
     printf("Latency: %d ms\n", latency);
     printf("Packet Loss: %.2f%%\n", packetLoss * 100);
+
+    double avgSpeed = calculateAverageSpeed(downloadSpeed, uploadSpeed);
+    printf("Average Speed: %.2f Mbps\n", avgSpeed);
 }
 
 void displayAverageResults(double avgDownloadSpeed, double avgUploadSpeed, double avgLatency, double avgPacketLoss, size_t numTests) {
@@ -77,6 +85,9 @@ void displayAverageResults(double avgDownloadSpeed, double avgUploadSpeed, doubl
     printf("Average Upload Speed: %.2f Mbps\n", avgUploadSpeed);
     printf("Average Latency: %.2f ms\n", avgLatency);
     printf("Average Packet Loss: %.2f%%\n", avgPacketLoss * 100);
+
+    double avgSpeed = calculateAverageSpeed(avgDownloadSpeed, avgUploadSpeed);
+    printf("Average Speed: %.2f Mbps\n", avgSpeed);
 }
 
 void handleError(const char* errorMessage) {
