@@ -1,11 +1,6 @@
-# ----------------------------------------------------------------
-# Developed by Felipe Alfonso González - Computer Science Engineer
-# Contact : f.alfonso@res-ear.ch - github.com/felipealfonsog
-# Under MIT Licence
-# ----------------------------------------------------------------
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct Server {
     char name[50];
@@ -26,6 +21,10 @@ int measureLatency(const struct Server* server) {
 
 double measurePacketLoss(const struct Server* server) {
     return (rand() % 10) / 10.0;
+}
+
+double calculateAverageSpeed(double downloadSpeed, double uploadSpeed) {
+    return (downloadSpeed + uploadSpeed) / 2;
 }
 
 void displayIntro() {
@@ -49,13 +48,80 @@ void displayIntro() {
     printf("\n");
 }
 
-void displayResults(const struct Server* selectedServer, double downloadSpeed, double uploadSpeed, int latency, double packetLoss) {
-    printf("\nTest Results:\n");
-    printf("Selected Server: %s (%s)\n", selectedServer->name, selectedServer->address);
-    printf("Download Speed: %.2f Mbps\n", downloadSpeed);
-    printf("Upload Speed: %.2f Mbps\n", uploadSpeed);
-    printf("Latency: %d ms\n", latency);
-    printf("Packet Loss: %.2f%%\n", packetLoss * 100);
+void displayServerMenu(const struct Server servers[], size_t numServers) {
+    printf("Select a server by entering its number:\n");
+
+    for (size_t i = 0; i < numServers; ++i) {
+        printf("%zu. %s\n", i + 1, servers[i].name);
+    }
+
+    int choice;
+    printf("Enter the number of the server: ");
+    scanf("%d", &choice);
+
+    if (choice < 1 || choice > (int)numServers) {
+        printf("Invalid server choice.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    struct Server selectedServer = servers[choice - 1];
+
+    printf("\n╔════════════════════════════════════╗\n");
+    printf("║ Selected Server: %-20s (%s)   ║\n", selectedServer.name, selectedServer.address);
+    printf("╚════════════════════════════════════╝\n");
+
+    double downloadSpeed = measureDownloadSpeed(&selectedServer);
+    double uploadSpeed = measureUploadSpeed(&selectedServer);
+    int latency = measureLatency(&selectedServer);
+    double packetLoss = measurePacketLoss(&selectedServer);
+
+    printf("\n╔══════════════════════════╗\n");
+    printf("║ Test Results for %s   ║\n", selectedServer.name);
+    printf("╟──────────────────────────╢\n");
+    printf("║ Download Speed: %.2f Mbps ║\n", downloadSpeed);
+    printf("║ Upload Speed: %.2f Mbps   ║\n", uploadSpeed);
+    printf("║ Latency: %d ms            ║\n", latency);
+    printf("║ Packet Loss: %.2f%%        ║\n", packetLoss * 100);
+    printf("╚══════════════════════════╝\n");
+
+    // Background test with 3 other random servers
+    printf("\nBackground Test with 3 Other Random Servers:\n");
+
+    double avgDownloadSpeed = 0, avgUploadSpeed = 0, avgLatency = 0, avgPacketLoss = 0;
+
+    for (size_t i = 0; i < 3; ++i) {
+        size_t randomIndex = rand() % numServers;
+        struct Server randomServer = servers[randomIndex];
+
+        double randomDownloadSpeed = measureDownloadSpeed(&randomServer);
+        double randomUploadSpeed = measureUploadSpeed(&randomServer);
+        int randomLatency = measureLatency(&randomServer);
+        double randomPacketLoss = measurePacketLoss(&randomServer);
+
+        avgDownloadSpeed += randomDownloadSpeed;
+        avgUploadSpeed += randomUploadSpeed;
+        avgLatency += randomLatency;
+        avgPacketLoss += randomPacketLoss;
+
+        // Display the names of servers used for background tests
+        printf("\n╔════════════════════════════════════╗\n");
+        printf("║ Background Test Server %zu: %-11s   ║\n", i + 1, randomServer.name);
+        printf("╚════════════════════════════════════╝\n");
+    }
+
+    avgDownloadSpeed /= 3;
+    avgUploadSpeed /= 3;
+    avgLatency /= 3;
+    avgPacketLoss /= 3;
+
+    printf("\n╔════════════════════════════════════════╗\n");
+    printf("║ Average Results for 3 Background Tests ║\n");
+    printf("╟────────────────────────────────────────╢\n");
+    printf("║ Average Download Speed: %.2f Mbps      ║\n", avgDownloadSpeed);
+    printf("║ Average Upload Speed: %.2f Mbps        ║\n", avgUploadSpeed);
+    printf("║ Average Latency: %.2f ms               ║\n", avgLatency);
+    printf("║ Average Packet Loss: %.2f%%           ║\n", avgPacketLoss * 100);
+    printf("╚════════════════════════════════════════╝\n");
 }
 
 void handleError(const char* errorMessage) {
@@ -97,29 +163,7 @@ int main() {
 
     size_t numServers = sizeof(servers) / sizeof(servers[0]);
 
-    printf("Select a server:\n");
-
-    for (size_t i = 0; i < numServers; ++i) {
-        printf("%zu. %s\n", i + 1, servers[i].name);
-    }
-
-    int choice;
-    printf("Enter the number of the server: ");
-    scanf("%d", &choice);
-
-    if (choice < 1 || choice > (int)numServers) {
-        handleError("Invalid server choice");
-        return 1;
-    }
-
-    struct Server selectedServer = servers[choice - 1];
-
-    double downloadSpeed = measureDownloadSpeed(&selectedServer);
-    double uploadSpeed = measureUploadSpeed(&selectedServer);
-    int latency = measureLatency(&selectedServer);
-    double packetLoss = measurePacketLoss(&selectedServer);
-
-    displayResults(&selectedServer, downloadSpeed, uploadSpeed, latency, packetLoss);
+    displayServerMenu(servers, numServers);
 
     return 0;
 }
