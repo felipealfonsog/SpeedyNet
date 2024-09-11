@@ -19,8 +19,8 @@ Experience the convenience of on-demand speed testing without relying on externa
 [![GPL license](https://img.shields.io/badge/License-GPL-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 -->
 
-[![Vim](https://img.shields.io/badge/--019733?logo=vim)](https://www.vim.org/)
-[![Visual Studio Code](https://img.shields.io/badge/--007ACC?logo=visual%20studio%20code&logoColor=ffffff)](https://code.visualstudio.com/)
+[![Vim Powered](https://img.shields.io/badge/Vim-Powered-%2311AB00.svg?logo=vim&logoColor=white)](https://www.vim.org)
+[![VS Code Powered](https://img.shields.io/badge/VS%20Code-Powered-%23007ACC.svg?logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/)
 
 #### Screenshot in macOS
 ![Screenshot](images/sshot-macos.png)
